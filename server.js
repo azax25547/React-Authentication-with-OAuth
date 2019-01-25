@@ -1,8 +1,7 @@
 const express = require("express");
+require("dotenv").config();
 const jwt = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
-
-require("dotenv").config();
 
 // JWT Validation
 const checkjwt = jwt({
@@ -15,7 +14,7 @@ const checkjwt = jwt({
     jwksRequestsPerMinute: 5,
     jwksUri: `https://${
       process.env.REACT_APP_AUTH0_DOMAIN
-    }/well-known/jwks.json`
+    }/.well-known/jwks.json`
   }),
 
   // validate the audience and the issuer
