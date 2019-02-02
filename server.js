@@ -2,7 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const jwt = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
-
+const checkScope = require("express-jwt-authz");
 // JWT Validation
 const checkjwt = jwt({
   // Dynamically provide a signing key based on the kid in the header
@@ -12,14 +12,12 @@ const checkjwt = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://${
-      process.env.REACT_APP_AUTH0_DOMAIN
-    }/.well-known/jwks.json`
+    jwksUri: "https://azax25547-dev.auth0.com/.well-known/jwks.json"
   }),
 
   // validate the audience and the issuer
-  audience: process.env.REACT_APP_AUTH0_AUDIENCE,
-  issuer: `https://${process.env.REACT_APP_AUTH0_DOMAIN}`,
+  audience: "http://localhost:3001",
+  issuer: "https://azax25547-dev.auth0.com/",
 
   // algorithm
   algorithms: ["RS256"]
@@ -32,11 +30,18 @@ app.get("/public", (req, res) => {
     message: "Hello From A Public API"
   });
 });
-
-app.get("/private", checkjwt, (req, res) => {
+app.use(checkjwt);
+app.get("/private", (req, res) => {
   res.json({
     message: "Hello From A Private API"
   });
 });
-
+app.get("/courses", checkjwt, checkScope(["read:courses"]), (req, res) => {
+  res.json({
+    courses: [
+      { id: 1, title: "Building Apps With REact" },
+      { id: 2, title: "Building app with nodejs" }
+    ]
+  });
+});
 app.listen(3001, () => console.log("Server is responding at 3001"));
